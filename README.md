@@ -4,7 +4,9 @@ A drum-rudiment practice app for iPad (and any browser), built as an installable
 
 **Stage 1:** audio engine, metronome, tempo control, loop and open-close-open modes, count-in, timed sessions, tempo ramping (timer or reps), dark responsive UI, offline support.
 
-**Stage 2 (this version):** all 26 standard (NARD) rudiments, drawn as standard notation (SVG) with sticking and a playhead that follows the audio. A Notation / Sticking switch shows big sticking letters instead.
+**Stage 2:** all 26 standard (NARD) rudiments, drawn as standard notation (SVG) with sticking and a playhead that follows the audio. A Notation / Sticking switch shows big sticking letters instead.
+
+**Stage 3 (this version):** routines (an ordered list of rudiments, each with its own tempo, length and mode, played back to back), a practice log (session history, best clean tempo per rudiment via the ✓ Clean button, daily time and streak), and JSON export/import of everything.
 
 ## Run it locally
 
@@ -40,9 +42,12 @@ js/audio.js           Web Audio engine: look-ahead scheduler, synthesized click 
 js/player.js          playback controller: engine, frame polling, wake lock, stop when hidden
 js/settings.js        settings defaults, ranges, validation, mapping to sequencer options
 js/store.js           failure-tolerant localStorage JSON helpers
+js/log.js             practice log: session records, best tempo, streak
+js/routines.js        routines: model, validation, mapping to playback
+js/backup.js          JSON export/import (merge)
 js/rudiments.js       rudiment library: the 26 standard rudiments
 js/notation.js        pure notation layout: rhythm spelling, beams, tuplets, line wrapping
-js/ui/                DOM views: SVG staff, sticking row, library list, drawer, settings controls
+js/ui/                DOM views: SVG staff, sticking row, library list, drawers, routines editor, log, settings controls
 js/app.js             composition root: state, rendering, input wiring
 sw.js, manifest.webmanifest, icons/   PWA / offline
 test/                 unit tests
@@ -69,3 +74,4 @@ Example: single paradiddle = `{ id: 'single-paradiddle', grid: 4, steps: 'R l r 
 - Audio only starts after a tap (iOS rule), so the first Start press unlocks it.
 - The screen stays awake while playing (Wake Lock). Playback stops if you switch apps, to avoid timing drift.
 - If sound is missing, check the iPad isn't muted in Control Center.
+- Back up from **Log → Export** now and then: the share sheet offers **Save to Files**. If Safari ever clears the app's data, **Log → Import…** brings it back (it merges, so importing twice does no harm).

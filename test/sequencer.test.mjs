@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parsePattern, Sequencer, graceGap } from '../js/sequencer.js';
+import { parsePattern, Sequencer, RoutineSequence, graceGap } from '../js/sequencer.js';
 import { RUDIMENTS } from '../js/rudiments.js';
 import { DrumEngine } from '../js/audio.js';
 
@@ -283,5 +283,75 @@ test('engine handles buzz rolls, live updates, muting and restart', async () => 
   engine.stop();
   await engine.start({ pattern: paradiddle, bpm: 80 });
   assert.equal(engine.playing, true);
+  engine.stop();
+});
+
+// ---- routines ----------------------------------------------------------------
+
+test('play events report their step duration', () => {
+  const seq = new Sequencer({ pattern: singles, bpm: 120, countIn: 1 });
+  near(seq.next().dur, 0.5);   // count-in click: one beat
+  near(seq.next().dur, 0.125); // sixteenth at 120
+});
+
+test('a routine plays its items in order, each after its own count-in, on one clock', () => {
+  const routine = new RoutineSequence({
+    countIn: 2,
+    items: [
+      { pattern: singles, bpm: 120, durationSec: 1 },
+      { pattern: paradiddle, bpm: 60, durationSec: 2 }, // one 2-beat rep at 60 = 2 s exactly
+    ],
+  });
+  const evs = collect(routine, 1000);
+  const end = evs.at(-1);
+  assert.equal(end.phase, 'end');
+  assert.equal(end.routine, true);
+
+  for (let i = 1; i < evs.length; i += 1) assert.ok(evs[i].time >= evs[i - 1].time - 1e-9, 'time never goes back');
+
+  const first = evs.filter((e) => e.item === 0);
+  const second = evs.filter((e) => e.item === 1);
+  assert.deepEqual(first.slice(0, 2).map((e) => e.phase), ['count', 'count']);
+  assert.deepEqual(second.slice(0, 2).map((e) => e.phase), ['count', 'count']);
+  assert.ok(first.filter((e) => e.phase === 'play').every((e) => e.patternId === 's' && e.bpm === 120));
+  assert.ok(second.filter((e) => e.phase === 'play').every((e) => e.patternId === 'p'));
+  assert.ok(second.every((e) => e.itemCount === 2));
+
+  // item 2 starts right where item 1 ended: 2 beats count-in at 120 + 1 s of play
+  near(second[0].time, 1 + 1);
+  // total: (1 s count + 1 s) + (2 s count at 60 + 2 s)
+  near(end.time, 6);
+  assert.equal(end.minBpm, 60);
+  assert.equal(end.maxBpm, 120);
+  assert.equal(routine.next().phase, 'end', 'stays ended');
+});
+
+test('a running routine only takes sound-level changes', () => {
+  const routine = new RoutineSequence({ items: [{ pattern: singles, bpm: 100, durationSec: 10 }] });
+  routine.update({ subClick: true, bpm: 200, pattern: paradiddle });
+  const evs = [routine.next(), routine.next()];
+  assert.ok(evs.every((e) => e.bpm === 100 && e.patternId === 's'));
+  assert.equal(evs[1].click?.level, 'sub');
+});
+
+test('routine items need a duration', () => {
+  assert.throws(() => new RoutineSequence({ items: [] }), /at least one item/);
+  assert.throws(() => new RoutineSequence({ items: [{ pattern: singles, bpm: 80 }] }), /needs a duration/);
+});
+
+test('engine accepts a ready-made tick source', async () => {
+  const stats = { gains: 0, oscs: 0, sources: 0 };
+  const engine = new DrumEngine({ AudioContextClass: makeFakeContext(stats), autoPump: false });
+  const routine = new RoutineSequence({ items: [{ pattern: singles, bpm: 120, durationSec: 0.5 }] });
+  await engine.start(routine);
+  assert.equal(engine.seq, routine);
+  const seen = [];
+  for (let i = 0; i < 100 && !seen.some((e) => e.phase === 'end'); i += 1) {
+    engine.ctx.currentTime += 0.02;
+    engine._pump();
+    seen.push(...engine.pollVisual());
+  }
+  assert.equal(seen.at(-1).phase, 'end');
+  assert.ok(seen.some((e) => e.item === 0 && e.phase === 'play'));
   engine.stop();
 });

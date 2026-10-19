@@ -146,6 +146,7 @@ export class Sequencer {
       const ev = {
         phase: 'count',
         time: this.t,
+        dur: 60 / bpm,
         bpm,
         step: -1,
         cycle: -1,
@@ -207,6 +208,7 @@ export class Sequencer {
     const ev = {
       phase: 'play',
       time: this.t,
+      dur: stepDur,
       bpm,
       step: this.step,
       stepsPerCycle: p.steps.length,
@@ -286,6 +288,81 @@ export class Sequencer {
       minBpm: Number.isFinite(this.minBpm) ? this.minBpm : this.bpm,
       maxBpm: this.maxBpm || this.bpm,
       patternId: this.pattern.id,
+    };
+  }
+}
+
+/**
+ * Plays routine items back to back on one clock. Each item runs as its own
+ * Sequencer (pattern, tempo, mode, duration) after its own count-in, so there
+ * is a moment to read the next rudiment. Play events carry `item` (index) and
+ * `itemCount`; the final 'end' event sums up the whole routine.
+ */
+export class RoutineSequence {
+  /**
+   * @param {object} o
+   * @param {object[]} o.items   Sequencer options per item; each needs pattern, bpm and durationSec > 0
+   * @param {number} [o.countIn] beats of count-in before every item
+   * @param {boolean} [o.subClick]
+   */
+  constructor({ items, countIn = 0, subClick = false }) {
+    if (!items?.length) throw new Error('a routine needs at least one item');
+    items.forEach((it, i) => {
+      if (!(it.durationSec > 0)) throw new Error(`routine item ${i} needs a duration`);
+    });
+    this.items = items;
+    this.countIn = countIn;
+    this.subClick = Boolean(subClick);
+    this.offset = 0;
+    this.ended = false;
+    this.cycles = 0;
+    this.minBpm = Infinity;
+    this.maxBpm = 0;
+    this._startItem(0);
+  }
+
+  /** Only sound-level changes apply to a running routine; each item keeps its own tempo and pattern. */
+  update(o = {}) {
+    if (o.subClick === undefined) return;
+    this.subClick = Boolean(o.subClick);
+    this.seq.update({ subClick: this.subClick });
+  }
+
+  next() {
+    if (this.ended) return this._endEvent();
+    let ev = this.seq.next();
+    while (ev.phase === 'end') {
+      this.cycles += ev.cycles;
+      this.minBpm = Math.min(this.minBpm, ev.minBpm);
+      this.maxBpm = Math.max(this.maxBpm, ev.maxBpm);
+      this.offset += ev.time;
+      if (this.index + 1 >= this.items.length) {
+        this.ended = true;
+        return this._endEvent();
+      }
+      this._startItem(this.index + 1);
+      ev = this.seq.next();
+    }
+    return { ...ev, time: ev.time + this.offset, item: this.index, itemCount: this.items.length };
+  }
+
+  _startItem(i) {
+    this.index = i;
+    this.seq = new Sequencer({ ...this.items[i], countIn: this.countIn, subClick: this.subClick });
+  }
+
+  _endEvent() {
+    return {
+      phase: 'end',
+      time: this.offset,
+      elapsed: this.offset,
+      cycles: this.cycles,
+      minBpm: this.minBpm,
+      maxBpm: this.maxBpm,
+      patternId: this.items[this.items.length - 1].pattern.id,
+      item: this.items.length - 1,
+      itemCount: this.items.length,
+      routine: true,
     };
   }
 }

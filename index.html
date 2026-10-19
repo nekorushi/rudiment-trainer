@@ -20,11 +20,15 @@
   <header class="topbar">
     <button type="button" id="open-library" class="chip" aria-controls="drawer" aria-expanded="false">☰ Rudiments</button>
     <h1>Rudiment Trainer</h1>
-    <span class="topbar-spacer" aria-hidden="true"></span>
+    <div class="topbar-right">
+      <button type="button" id="open-routines" class="chip" aria-controls="routines-drawer" aria-expanded="false">Routines</button>
+      <button type="button" id="open-log" class="chip" aria-controls="log-drawer" aria-expanded="false">Log</button>
+    </div>
   </header>
 
   <main class="layout">
     <section class="stage" aria-label="Practice">
+      <p class="routine-banner" id="routine-banner" hidden></p>
       <div class="rudiment-head">
         <p class="family" id="r-family"></p>
         <h2 id="r-name"></h2>
@@ -34,16 +38,20 @@
       <div class="sticking" id="sticking" role="img" aria-label="Sticking pattern" hidden></div>
 
       <div class="readout">
-        <div class="bpm-row">
+        <div class="bpm-row lockable">
           <button type="button" class="round" id="bpm-down" aria-label="Slower">−</button>
           <div class="bpm"><span id="bpm-value">80</span><small>BPM</small></div>
           <button type="button" class="round" id="bpm-up" aria-label="Faster">+</button>
         </div>
-        <input type="range" id="bpm-range" min="30" max="260" step="1" aria-label="Tempo">
+        <input type="range" id="bpm-range" class="lockable" min="30" max="260" step="1" aria-label="Tempo">
         <p class="live" id="live" aria-live="polite">Ready</p>
+        <p class="toast" id="toast" role="status"></p>
       </div>
 
-      <button type="button" id="play" class="play" aria-pressed="false">Start</button>
+      <div class="play-row">
+        <button type="button" id="play" class="play" aria-pressed="false">Start</button>
+        <button type="button" id="clean" class="clean" hidden>✓ Clean</button>
+      </div>
     </section>
 
     <section class="settings" aria-label="Practice settings">
@@ -56,14 +64,14 @@
             <button type="button" role="radio" data-v="sticking">Sticking</button>
           </div>
         </div>
-        <div class="row">
+        <div class="row lockable">
           <span>Mode</span>
           <div class="seg" data-seg="mode" role="radiogroup" aria-label="Playback mode">
             <button type="button" role="radio" data-v="loop">Loop</button>
             <button type="button" role="radio" data-v="oco">Open–close–open</button>
           </div>
         </div>
-        <div class="row only-oco">
+        <div class="row only-oco lockable">
           <span>Top tempo</span>
           <div class="stepper" data-stepper="ocoHigh"></div>
         </div>
@@ -84,13 +92,13 @@
             <button type="button" role="radio" data-v="8">2 bars</button>
           </div>
         </div>
-        <div class="row">
+        <div class="row lockable">
           <span>Timed session</span>
           <div class="stepper" data-stepper="sessionMin"></div>
         </div>
       </div>
 
-      <div class="card" id="ramp-card">
+      <div class="card lockable" id="ramp-card">
         <h3>Tempo ramp</h3>
         <div class="row">
           <span>Ramp</span>
@@ -152,6 +160,22 @@
     <button type="button" class="chip" id="close-library">Close</button>
   </div>
   <div id="library"></div>
+</aside>
+
+<aside class="drawer right" id="routines-drawer" aria-label="Routines" aria-hidden="true" inert>
+  <div class="drawer-head">
+    <h2>Routines</h2>
+    <button type="button" class="chip" id="close-routines">Close</button>
+  </div>
+  <div class="panel" id="routines"></div>
+</aside>
+
+<aside class="drawer right" id="log-drawer" aria-label="Practice log" aria-hidden="true" inert>
+  <div class="drawer-head">
+    <h2>Practice log</h2>
+    <button type="button" class="chip" id="close-log">Close</button>
+  </div>
+  <div class="panel" id="log"></div>
 </aside>
 
 <script type="module" src="js/app.js"></script>

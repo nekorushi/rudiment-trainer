@@ -7,11 +7,15 @@
  * @param {HTMLElement} o.scrim    tapping it closes the drawer
  * @param {HTMLElement} o.opener   button that opens it (gets aria-expanded)
  * @param {HTMLElement} [o.closer] button inside the drawer that closes it
+ * @param {() => void} [o.onOpen]  e.g. close the other drawers
+ * @param {() => void} [o.onClose]
  */
-export function createDrawer({ drawer, scrim, opener, closer }) {
+export function createDrawer({ drawer, scrim, opener, closer, onOpen, onClose }) {
   let isOpen = false;
 
   function setOpen(open) {
+    if (open) onOpen?.();
+    else onClose?.();
     isOpen = open;
     drawer.classList.toggle('open', open);
     drawer.toggleAttribute('inert', !open);

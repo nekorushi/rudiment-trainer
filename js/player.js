@@ -34,12 +34,15 @@ export class Player {
     this.engine.setMuted({ click: !clickOn, drum: !drumOn });
   }
 
-  /** Start playing. Call from a user gesture (iOS audio unlock). Throws if audio can't start. */
-  async start(seqOptions) {
+  /**
+   * Start playing a tick source (or Sequencer options). Call from a user
+   * gesture (iOS audio unlock). Throws if audio can't start.
+   */
+  async start(source) {
     if (this.starting || this.playing) return;
     this.starting = true;
     try {
-      await this.engine.start(seqOptions);
+      await this.engine.start(source);
       this.playing = true;
       this._requestWake();
       this.raf = requestAnimationFrame(this._frame);

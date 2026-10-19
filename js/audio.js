@@ -73,7 +73,11 @@ export class DrumEngine {
     src.start(0);
   }
 
-  async start(seqOptions) {
+  /**
+   * @param {object} source  a tick source with next()/update() (Sequencer, RoutineSequence),
+   *                         or Sequencer options to build one
+   */
+  async start(source) {
     await this.unlock();
     this._silence();
 
@@ -85,7 +89,7 @@ export class DrumEngine {
     this.drumBus.connect(this.out);
     this._applyLevels(true);
 
-    this.seq = new Sequencer(seqOptions);
+    this.seq = typeof source?.next === 'function' ? source : new Sequencer(source);
     this.t0 = this.ctx.currentTime + START_DELAY;
     this.peek = null;
     this.visual.length = 0;

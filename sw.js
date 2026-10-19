@@ -1,15 +1,18 @@
 // Offline support: precache the app shell, then serve from cache and refresh
 // in the background (stale-while-revalidate). New versions show up on the
 // second launch after you deploy; bump CACHE to force a clean slate.
-const CACHE = 'rudiments-shell-v3';
+const CACHE = 'rudiments-shell-v4';
 const SHELL = [
   './',
   'index.html',
   'css/styles.css',
   'js/app.js',
   'js/audio.js',
+  'js/backup.js',
+  'js/log.js',
   'js/notation.js',
   'js/player.js',
+  'js/routines.js',
   'js/rudiments.js',
   'js/sequencer.js',
   'js/settings.js',
@@ -18,7 +21,9 @@ const SHELL = [
   'js/ui/dom.js',
   'js/ui/drawer.js',
   'js/ui/library.js',
+  'js/ui/logview.js',
   'js/ui/notation.js',
+  'js/ui/routines.js',
   'js/ui/sticking.js',
   'manifest.webmanifest',
   'icons/icon.svg',
