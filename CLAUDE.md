@@ -18,18 +18,20 @@ Personal drum-rudiments practice PWA for the owner's iPad. Installed via Safari 
 ## Status
 
 - **Stage 1 DONE:** sequencer, audio engine, shell UI, loop/OCO/count-in/timed/ramp, PWA + offline. 19 unit tests pass, plus a jsdom UI smoke test (not in the repo).
+- **Pre-stage-2 groundwork DONE:** git repo, `app.js` split into modules (see layout below), settings sanitizing, sw.js install bypasses the HTTP cache, test that SHELL covers every file. 27 tests.
 - **Stage 2 TODO:** full 26 rudiments in `rudiments.js`, standard notation as SVG with a playhead synced to `ev.step`, notation/sticking toggle if it helps.
 - **Stage 3 TODO:** routines runner, practice log (best tempo, history, streak), export/import, polish.
 
 ## Architecture rules
 
+- Module layout: `js/` top level is logic, `js/ui/` is DOM views. Pure and Node-tested: `sequencer.js` (timing), `settings.js` (defaults, ranges, `sanitizeSettings`, `toSeqOptions`), `store.js` (try/catch JSON storage). `player.js` owns the `DrumEngine` plus rAF polling, wake lock and stop-on-hidden; the UI only talks to it. `app.js` is the composition root only; new features go in their own module, not in `app.js`.
 - `js/sequencer.js` is **pure** (no DOM, no Web Audio) and fully unit tested. Put timing logic there, with tests.
 - `js/audio.js` schedules on the audio clock with a look-ahead (150 ms, pumped every 25 ms from a Worker timer, setInterval fallback). Never schedule sounds from `setTimeout` or `requestAnimationFrame`.
 - The UI only learns what is playing from `engine.pollVisual()` events (each has `step`, `cycle`, `bpm`, `elapsed`, `patternId`, `phase`). Use these to drive the notation playhead; do not compute positions separately.
 - Pattern changes apply at the next repetition boundary. Grace notes are scheduled *before* the main stroke by `graceGap()`; keep total pre-offset under the look-ahead (tested).
-- Settings persist in `localStorage` under `rudiments.settings.v1`. Wrap storage access in try/catch.
+- Settings persist in `localStorage` under `rudiments.settings.v1`. All storage goes through `store.js` (`readJSON`/`writeJSON`, already try/catch). Anything loaded or imported passes through a sanitizer (`sanitizeSettings` for settings); new stores get versioned keys `rudiments.<what>.v1`.
 - iOS: audio must be unlocked from a user gesture (done in `DrumEngine.unlock`); playback stops when the page is hidden.
-- When shipping changes, bump `CACHE` in `sw.js` and add any new files to its `SHELL` list.
+- When shipping changes, bump `CACHE` in `sw.js` and add any new files to its `SHELL` list. `test/shell.test.mjs` fails if a file under `js/`, `css/` or `icons/` is missing from `SHELL` (it can't check the `CACHE` bump).
 
 ## Commands
 

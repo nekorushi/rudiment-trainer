@@ -35,8 +35,12 @@ index.html            UI skeleton
 css/styles.css        dark, responsive styles
 js/sequencer.js       pure timing logic (patterns, tempo ramp, open-close-open, count-in)
 js/audio.js           Web Audio engine: look-ahead scheduler, synthesized click and snare
+js/player.js          playback controller: engine, frame polling, wake lock, stop when hidden
+js/settings.js        settings defaults, ranges, validation, mapping to sequencer options
+js/store.js           failure-tolerant localStorage JSON helpers
 js/rudiments.js       rudiment library (starter set for now)
-js/app.js             UI wiring and persistence (localStorage)
+js/ui/                DOM views: sticking row, library list, drawer, settings controls
+js/app.js             composition root: state, rendering, input wiring
 sw.js, manifest.webmanifest, icons/   PWA / offline
 test/                 unit tests
 make_icons.py         regenerates the PNG icons (Pillow)

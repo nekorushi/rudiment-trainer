@@ -1,15 +1,23 @@
 // Offline support: precache the app shell, then serve from cache and refresh
 // in the background (stale-while-revalidate). New versions show up on the
 // second launch after you deploy; bump CACHE to force a clean slate.
-const CACHE = 'rudiments-shell-v1';
+const CACHE = 'rudiments-shell-v2';
 const SHELL = [
   './',
   'index.html',
   'css/styles.css',
   'js/app.js',
   'js/audio.js',
-  'js/sequencer.js',
+  'js/player.js',
   'js/rudiments.js',
+  'js/sequencer.js',
+  'js/settings.js',
+  'js/store.js',
+  'js/ui/controls.js',
+  'js/ui/dom.js',
+  'js/ui/drawer.js',
+  'js/ui/library.js',
+  'js/ui/sticking.js',
   'manifest.webmanifest',
   'icons/icon.svg',
   'icons/icon-192.png',
@@ -20,7 +28,11 @@ const SHELL = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()),
+    // `reload` bypasses the HTTP cache: GitHub Pages sends max-age=600, so a plain
+    // fetch right after a deploy could precache the previous version's files.
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(SHELL.map((url) => new Request(url, { cache: 'reload' }))))
+      .then(() => self.skipWaiting()),
   );
 });
 
