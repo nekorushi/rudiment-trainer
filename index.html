@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f13">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rudiments">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Rudiment Trainer</title>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button type="button" id="open-library" class="chip" aria-controls="drawer" aria-expanded="false">☰ Rudiments</button>
+    <h1>Rudiment Trainer</h1>
+    <span class="topbar-spacer" aria-hidden="true"></span>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="Practice">
+      <div class="rudiment-head">
+        <p class="family" id="r-family"></p>
+        <h2 id="r-name"></h2>
+      </div>
+
+      <div class="sticking" id="sticking" role="img" aria-label="Sticking pattern"></div>
+
+      <div class="readout">
+        <div class="bpm-row">
+          <button type="button" class="round" id="bpm-down" aria-label="Slower">−</button>
+          <div class="bpm"><span id="bpm-value">80</span><small>BPM</small></div>
+          <button type="button" class="round" id="bpm-up" aria-label="Faster">+</button>
+        </div>
+        <input type="range" id="bpm-range" min="30" max="260" step="1" aria-label="Tempo">
+        <p class="live" id="live" aria-live="polite">Ready</p>
+      </div>
+
+      <button type="button" id="play" class="play" aria-pressed="false">Start</button>
+    </section>
+
+    <section class="settings" aria-label="Practice settings">
+      <div class="card">
+        <h3>Playback</h3>
+        <div class="row">
+          <span>Mode</span>
+          <div class="seg" data-seg="mode" role="radiogroup" aria-label="Playback mode">
+            <button type="button" role="radio" data-v="loop">Loop</button>
+            <button type="button" role="radio" data-v="oco">Open–close–open</button>
+          </div>
+        </div>
+        <div class="row only-oco">
+          <span>Top tempo</span>
+          <div class="stepper" data-stepper="ocoHigh"></div>
+        </div>
+        <div class="row only-oco">
+          <span>Sweep length</span>
+          <div class="stepper" data-stepper="ocoCycles"></div>
+        </div>
+        <p class="hint" id="mode-hint"></p>
+      </div>
+
+      <div class="card">
+        <h3>Start &amp; finish</h3>
+        <div class="row">
+          <span>Count-in</span>
+          <div class="seg" data-seg="countIn" role="radiogroup" aria-label="Count-in">
+            <button type="button" role="radio" data-v="0">Off</button>
+            <button type="button" role="radio" data-v="4">1 bar</button>
+            <button type="button" role="radio" data-v="8">2 bars</button>
+          </div>
+        </div>
+        <div class="row">
+          <span>Timed session</span>
+          <div class="stepper" data-stepper="sessionMin"></div>
+        </div>
+      </div>
+
+      <div class="card" id="ramp-card">
+        <h3>Tempo ramp</h3>
+        <div class="row">
+          <span>Ramp</span>
+          <div class="seg" data-seg="rampMode" role="radiogroup" aria-label="Tempo ramp">
+            <button type="button" role="radio" data-v="off">Off</button>
+            <button type="button" role="radio" data-v="time">Timer</button>
+            <button type="button" role="radio" data-v="reps">Reps</button>
+          </div>
+        </div>
+        <div class="row only-ramp">
+          <span>Change by</span>
+          <div class="stepper" data-stepper="rampInc"></div>
+        </div>
+        <div class="row only-ramp only-time">
+          <span>Every</span>
+          <div class="stepper" data-stepper="rampEverySec"></div>
+        </div>
+        <div class="row only-ramp only-reps">
+          <span>Every</span>
+          <div class="stepper" data-stepper="rampEveryReps"></div>
+        </div>
+        <div class="row only-ramp">
+          <span>Until</span>
+          <div class="stepper" data-stepper="rampTarget"></div>
+        </div>
+        <p class="hint" id="ramp-hint"></p>
+      </div>
+
+      <div class="card">
+        <h3>Sound</h3>
+        <div class="row">
+          <label for="t-click">Click</label>
+          <input type="checkbox" id="t-click" class="switch" data-toggle="clickOn">
+        </div>
+        <div class="row slider-row">
+          <input type="range" min="0" max="1" step="0.05" data-slider="clickLevel" aria-label="Click volume">
+        </div>
+        <div class="row">
+          <label for="t-drum">Drum</label>
+          <input type="checkbox" id="t-drum" class="switch" data-toggle="drumOn">
+        </div>
+        <div class="row slider-row">
+          <input type="range" min="0" max="1" step="0.05" data-slider="drumLevel" aria-label="Drum volume">
+        </div>
+        <div class="row">
+          <label for="t-sub">Click every subdivision</label>
+          <input type="checkbox" id="t-sub" class="switch" data-toggle="subClick">
+        </div>
+        <p class="hint">Turn the drum off to play along on your own pad with just the click.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Rudiments" aria-hidden="true" inert>
+  <div class="drawer-head">
+    <h2>Rudiments</h2>
+    <button type="button" class="chip" id="close-library">Close</button>
+  </div>
+  <div id="library"></div>
+</aside>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
