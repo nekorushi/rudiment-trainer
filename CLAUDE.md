@@ -5,7 +5,7 @@ Personal drum-rudiments practice PWA for the owner's iPad. Installed via Safari 
 ## Decisions already made (from the brainstorm)
 
 - **Purpose:** practice tool first (metronome + play-along), not a reference book.
-- **Content:** the 26 essential (NARD) rudiments. A starter set of 6 is in `js/rudiments.js` and must be replaced.
+- **Content:** the 26 standard (NARD) rudiments, in `js/rudiments.js`. Stroke rolls use the open form (diddles as sixteenths); rudiments that end on their starting hand have a right-lead and a left-lead half. Ids are permanent (the Stage 3 log will be keyed by them).
 - **Display per rudiment:** sticking letters (R/L), standard notation as **custom SVG** (no VexFlow), animated playhead synced to the audio, audio playback.
 - **Audio:** Web Audio **synthesis** only (no sample files). Accents, taps and grace notes at different volumes. No stereo panning.
 - **Playback:** continuous loop, open-close-open, count-in, timed session. All four exist.
@@ -19,12 +19,13 @@ Personal drum-rudiments practice PWA for the owner's iPad. Installed via Safari 
 
 - **Stage 1 DONE:** sequencer, audio engine, shell UI, loop/OCO/count-in/timed/ramp, PWA + offline. 19 unit tests pass, plus a jsdom UI smoke test (not in the repo).
 - **Pre-stage-2 groundwork DONE:** git repo, `app.js` split into modules (see layout below), settings sanitizing, sw.js install bypasses the HTTP cache, test that SHELL covers every file. 27 tests.
-- **Stage 2 TODO:** full 26 rudiments in `rudiments.js`, standard notation as SVG with a playhead synced to `ev.step`, notation/sticking toggle if it helps.
+- **Stage 2 DONE:** all 26 rudiments; `js/notation.js` (pure layout: rhythm spelling, beams, tuplets, line wrapping, step positions) and `js/ui/notation.js` (SVG view + playhead from `ev.step`); Notation/Sticking toggle (`view` setting). 66 tests. Notation grids are limited to 1, 2, 3, 4, 6, 8 (tested).
 - **Stage 3 TODO:** routines runner, practice log (best tempo, history, streak), export/import, polish.
 
 ## Architecture rules
 
 - Module layout: `js/` top level is logic, `js/ui/` is DOM views. Pure and Node-tested: `sequencer.js` (timing), `settings.js` (defaults, ranges, `sanitizeSettings`, `toSeqOptions`), `store.js` (try/catch JSON storage). `player.js` owns the `DrumEngine` plus rAF polling, wake lock and stop-on-hidden; the UI only talks to it. `app.js` is the composition root only; new features go in their own module, not in `app.js`.
+- Pattern views (`NotationView`, `StickingView`) share one interface: `show(pattern)`, `highlight(step)`, `clearHighlight()`, `patternId`. The SVG view only draws what `layoutPattern` returns; put any notation logic in `js/notation.js`, with tests.
 - `js/sequencer.js` is **pure** (no DOM, no Web Audio) and fully unit tested. Put timing logic there, with tests.
 - `js/audio.js` schedules on the audio clock with a look-ahead (150 ms, pumped every 25 ms from a Worker timer, setInterval fallback). Never schedule sounds from `setTimeout` or `requestAnimationFrame`.
 - The UI only learns what is playing from `engine.pollVisual()` events (each has `step`, `cycle`, `bpm`, `elapsed`, `patternId`, `phase`). Use these to drive the notation playhead; do not compute positions separately.

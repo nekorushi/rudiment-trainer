@@ -9,6 +9,7 @@ export const BPM_MAX = 260;
 
 export const DEFAULTS = {
   rudiment: 'single-stroke-roll',
+  view: 'notation',
   bpm: 80,
   mode: 'loop',
   ocoHigh: 140,
@@ -39,6 +40,7 @@ export const STEPPERS = {
 };
 
 const CHOICES = {
+  view: ['notation', 'sticking'],
   mode: ['loop', 'oco'],
   rampMode: ['off', 'time', 'reps'],
   countIn: [0, 4, 8],

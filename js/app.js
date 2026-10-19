@@ -6,12 +6,14 @@ import { BPM_MIN, BPM_MAX, clamp, loadSettings, saveSettings, applySetting, toSe
 import { Player } from './player.js';
 import { $, $$ } from './ui/dom.js';
 import { StickingView } from './ui/sticking.js';
+import { NotationView } from './ui/notation.js';
 import { renderLibrary, markLibrary } from './ui/library.js';
 import { createDrawer } from './ui/drawer.js';
 import { holdRepeat, bindControls, renderControls } from './ui/controls.js';
 
 const S = loadSettings(RUDIMENTS.map((r) => r.id));
-const sticking = new StickingView($('#sticking'));
+const views = { notation: new NotationView($('#notation')), sticking: new StickingView($('#sticking')) };
+const view = () => views[S.view];
 const player = new Player({ onEvent: handleEvent, onStop: handleStop });
 let library = null;
 let lastSecond = -1;
@@ -19,6 +21,7 @@ let lastSecond = -1;
 // ---- state changes -----------------------------------------------------------
 
 function set(key, value) {
+  if (key === 'view' && value !== S.view) view().clearHighlight();
   applySetting(S, key, value);
   saveSettings(S);
   render();
@@ -32,8 +35,11 @@ function render() {
   const r = getRudiment(S.rudiment);
   $('#r-name').textContent = r.name;
   $('#r-family').textContent = r.family ?? '';
-  // While playing, the sticking row follows the engine (a new rudiment starts at the next rep).
-  if (!player.playing && sticking.patternId !== r.id) sticking.show(r);
+  $('#notation').hidden = S.view !== 'notation';
+  $('#sticking').hidden = S.view !== 'sticking';
+  $('#notation').setAttribute('aria-label', `${r.name}: ${r.notation}`);
+  // While playing, the pattern view follows the engine (a new rudiment starts at the next rep).
+  if (!player.playing && view().patternId !== r.id) view().show(r);
 
   $('#bpm-value').textContent = S.bpm;
   $('#bpm-range').value = S.bpm;
@@ -87,7 +93,7 @@ async function togglePlay() {
 
 function handleStop(message) {
   setPlayUi(false);
-  sticking.clearHighlight();
+  view().clearHighlight();
   $('#live').textContent = message;
   render();
 }
@@ -102,8 +108,9 @@ function handleEvent(ev) {
     $('#live').textContent = `Count-in  ${ev.countIndex + 1} / ${ev.countTotal}`;
     return;
   }
-  if (ev.patternId !== sticking.patternId) sticking.show(getRudiment(ev.patternId));
-  sticking.highlight(ev.step);
+  const v = view();
+  if (ev.patternId !== v.patternId) v.show(getRudiment(ev.patternId));
+  v.highlight(ev.step);
 
   const sec = Math.floor(ev.elapsed);
   if (sec !== lastSecond || ev.step === 0) {

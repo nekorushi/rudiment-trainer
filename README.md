@@ -2,7 +2,9 @@
 
 A drum-rudiment practice app for iPad (and any browser), built as an installable web app (PWA). No build step, no dependencies, works offline once installed.
 
-**Stage 1 (this version):** audio engine, metronome, tempo control, loop and open-close-open modes, count-in, timed sessions, tempo ramping (timer or reps), routines-ready architecture, dark responsive UI, offline support. Ships with a small starter set of 6 rudiments.
+**Stage 1:** audio engine, metronome, tempo control, loop and open-close-open modes, count-in, timed sessions, tempo ramping (timer or reps), dark responsive UI, offline support.
+
+**Stage 2 (this version):** all 26 standard (NARD) rudiments, drawn as standard notation (SVG) with sticking and a playhead that follows the audio. A Notation / Sticking switch shows big sticking letters instead.
 
 ## Run it locally
 
@@ -38,8 +40,9 @@ js/audio.js           Web Audio engine: look-ahead scheduler, synthesized click 
 js/player.js          playback controller: engine, frame polling, wake lock, stop when hidden
 js/settings.js        settings defaults, ranges, validation, mapping to sequencer options
 js/store.js           failure-tolerant localStorage JSON helpers
-js/rudiments.js       rudiment library (starter set for now)
-js/ui/                DOM views: sticking row, library list, drawer, settings controls
+js/rudiments.js       rudiment library: the 26 standard rudiments
+js/notation.js        pure notation layout: rhythm spelling, beams, tuplets, line wrapping
+js/ui/                DOM views: SVG staff, sticking row, library list, drawer, settings controls
 js/app.js             composition root: state, rendering, input wiring
 sw.js, manifest.webmanifest, icons/   PWA / offline
 test/                 unit tests
@@ -48,7 +51,7 @@ make_icons.py         regenerates the PNG icons (Pillow)
 
 ## Rudiment notation
 
-One token per grid step; `grid` steps make one beat (4 = sixteenths, 2 = eighths, 3 = triplets). A pattern must fill whole beats.
+One token per grid step; `grid` steps make one beat (1 = quarters, 2 = eighths, 3 = triplets, 4 = sixteenths, 6 = sextuplets, 8 = thirty-seconds; the staff can't draw other grids). A pattern must fill whole beats. On the staff a stroke lasts until the next one, so `R . . .` is a quarter note. Optional `bar` sets beats per bar (default 2 for an even number of beats, otherwise one bar).
 
 | Token | Meaning |
 |---|---|

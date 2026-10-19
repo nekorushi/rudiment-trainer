@@ -30,7 +30,8 @@
         <h2 id="r-name"></h2>
       </div>
 
-      <div class="sticking" id="sticking" role="img" aria-label="Sticking pattern"></div>
+      <div class="notation" id="notation" role="img" aria-label="Notation"></div>
+      <div class="sticking" id="sticking" role="img" aria-label="Sticking pattern" hidden></div>
 
       <div class="readout">
         <div class="bpm-row">
@@ -48,6 +49,13 @@
     <section class="settings" aria-label="Practice settings">
       <div class="card">
         <h3>Playback</h3>
+        <div class="row">
+          <span>Show</span>
+          <div class="seg" data-seg="view" role="radiogroup" aria-label="Pattern display">
+            <button type="button" role="radio" data-v="notation">Notation</button>
+            <button type="button" role="radio" data-v="sticking">Sticking</button>
+          </div>
+        </div>
         <div class="row">
           <span>Mode</span>
           <div class="seg" data-seg="mode" role="radiogroup" aria-label="Playback mode">
