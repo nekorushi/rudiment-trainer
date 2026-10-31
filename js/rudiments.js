@@ -1,6 +1,9 @@
-// Rudiment library: the 26 standard American drum rudiments (NARD).
+// Rudiment library: a registry of collections (NARD 26, PAS additions), each in its own
+// module under js/collections/. A collection is
+//   { id, name, title, families: [display order], specs: [rudiment spec] }
+// and every rudiment gets `collection` set to its collection's id.
 //
-// Notation (one token per grid step, `grid` steps = one beat):
+// Spec notation (one token per grid step, `grid` steps = one beat):
 //   R L = accented stroke   r l = unaccented tap   . = rest
 //   (l)R = flam   (ll)R = drag   R~ - - - = buzz roll held across the "-" steps
 // For the staff, a note lasts until the next stroke (rests after a stroke just
@@ -8,66 +11,43 @@
 // even, else all beats in one bar). Grids must be 1, 2, 3, 4, 6 or 8 so the
 // notation can spell them (straight, triplet or sextuplet).
 //
-// Interpretation: stroke rolls are written open, with the diddles as
-// sixteenths and the accented release on the next beat or offbeat. Rudiments
-// that end on the hand they started with alternate (a right-lead and a
-// left-lead half), so both hands get the same work.
+// Rudiment ids are global and permanent (the log and routines refer to them),
+// so a new collection must not reuse an id from another one.
 
 import { parsePattern } from './sequencer.js';
+import { NARD } from './collections/nard.js';
+import { PAS } from './collections/pas.js';
 
-export const FAMILIES = ['Rolls', 'Diddles', 'Flams', 'Drags'];
+const SOURCES = [NARD, PAS];
 
-const SPECS = [
-  // ---- rolls ----
-  { id: 'single-stroke-roll', name: 'Single Stroke Roll', family: 'Rolls', grid: 4, steps: 'r l r l r l r l' },
-  { id: 'long-roll', name: 'Long Roll (Double Stroke)', family: 'Rolls', grid: 4, steps: 'r r l l r r l l' },
-  { id: 'five-stroke-roll', name: 'Five Stroke Roll', family: 'Rolls', grid: 4,
-    steps: 'r r l l R . . . l l r r L . . .' },
-  { id: 'seven-stroke-roll', name: 'Seven Stroke Roll', family: 'Rolls', grid: 4, steps: 'l l r r l l R .' },
-  { id: 'nine-stroke-roll', name: 'Nine Stroke Roll', family: 'Rolls', grid: 4, bar: 3,
-    steps: 'r r l l r r l l R . . . l l r r l l r r L . . .' },
-  { id: 'ten-stroke-roll', name: 'Ten Stroke Roll', family: 'Rolls', grid: 4, bar: 3,
-    steps: 'r r l l r r l l R . L .' },
-  { id: 'eleven-stroke-roll', name: 'Eleven Stroke Roll', family: 'Rolls', grid: 4, bar: 3,
-    steps: 'r r l l r r l l r r L .' },
-  { id: 'thirteen-stroke-roll', name: 'Thirteen Stroke Roll', family: 'Rolls', grid: 4, bar: 4,
-    steps: 'r r l l r r l l r r l l R . . . l l r r l l r r l l r r L . . .' },
-  { id: 'fifteen-stroke-roll', name: 'Fifteen Stroke Roll', family: 'Rolls', grid: 4, bar: 4,
-    steps: 'r r l l r r l l r r l l r r L .' },
+/** Collection metadata in display order: { id, name, title, families }. */
+export const COLLECTIONS = SOURCES.map(({ specs, ...meta }) => meta);
 
-  // ---- diddles ----
-  { id: 'single-paradiddle', name: 'Single Paradiddle', family: 'Diddles', grid: 4, steps: 'R l r r L r l l' },
-  { id: 'double-paradiddle', name: 'Double Paradiddle', family: 'Diddles', grid: 6,
-    steps: 'R l r l r r L r l r l l' },
-
-  // ---- flams ----
-  { id: 'flam', name: 'Flam', family: 'Flams', grid: 1, steps: '(l)R (r)L' },
-  { id: 'flam-accent', name: 'Flam Accent', family: 'Flams', grid: 3, steps: '(l)R l r (r)L r l' },
-  { id: 'flam-tap', name: 'Flam Tap', family: 'Flams', grid: 4, steps: '(l)R r (r)L l (l)R r (r)L l' },
-  { id: 'flamacue', name: 'Flamacue', family: 'Flams', grid: 4, steps: '(l)r L r l (l)R . . .' },
-  { id: 'flam-paradiddle', name: 'Flam Paradiddle', family: 'Flams', grid: 4, steps: '(l)R l r r (r)L r l l' },
-  { id: 'flam-paradiddle-diddle', name: 'Flam Paradiddle-diddle', family: 'Flams', grid: 6,
-    steps: '(l)R l r r l l (r)L r l l r r' },
-
-  // ---- drags ----
-  { id: 'ruff', name: 'Ruff (Drag)', family: 'Drags', grid: 1, steps: '(ll)R (rr)L' },
-  { id: 'single-drag', name: 'Single Drag', family: 'Drags', grid: 2, steps: '(ll)r L (rr)l R' },
-  { id: 'double-drag', name: 'Double Drag', family: 'Drags', grid: 4, steps: '(ll)r (ll)r L . (rr)l (rr)l R .' },
-  { id: 'lesson-25', name: 'Lesson 25 (Ratatap)', family: 'Drags', grid: 4, steps: '(ll)r l R . (rr)l r L .' },
-  { id: 'drag-paradiddle-1', name: 'Drag Paradiddle No. 1', family: 'Drags', grid: 4, bar: 3,
-    steps: 'R . (ll)r l r r L . (rr)l r l l' },
-  { id: 'drag-paradiddle-2', name: 'Drag Paradiddle No. 2', family: 'Drags', grid: 4,
-    steps: 'R . (ll)r . (ll)r l r r L . (rr)l . (rr)l r l l' },
-  { id: 'single-ratamacue', name: 'Single Ratamacue', family: 'Drags', grid: 6,
-    steps: '(ll)r l r L . . (rr)l r l R . .' },
-  { id: 'double-ratamacue', name: 'Double Ratamacue', family: 'Drags', grid: 6, bar: 3,
-    steps: '(ll)r . . (ll)r l r L . . (rr)l . . (rr)l r l R . .' },
-  { id: 'triple-ratamacue', name: 'Triple Ratamacue', family: 'Drags', grid: 6,
-    steps: '(ll)r . . (ll)r . . (ll)r l r L . . (rr)l . . (rr)l . . (rr)l r l R . .' },
-];
-
-export const RUDIMENTS = SPECS.map(parsePattern);
+export const RUDIMENTS = SOURCES.flatMap((c) => c.specs.map((s) => parsePattern({ ...s, collection: c.id })));
 
 export function getRudiment(id) {
   return RUDIMENTS.find((r) => r.id === id) ?? RUDIMENTS[0];
+}
+
+export function getCollection(id) {
+  return COLLECTIONS.find((c) => c.id === id);
+}
+
+/** "NARD 26 · Rolls" */
+export function groupLabel(r) {
+  const c = getCollection(r.collection);
+  return [c?.name, r.family].filter(Boolean).join(' · ');
+}
+
+/**
+ * Rudiments grouped for lists and pickers, in display order:
+ * [{ collection, families: [{ name, rudiments }] }]. Empty groups are left out.
+ */
+export function groupRudiments(rudiments = RUDIMENTS) {
+  return COLLECTIONS.map((collection) => ({
+    collection,
+    families: collection.families
+      .map((name) => ({ name, rudiments: rudiments.filter((r) => r.collection === collection.id && r.family === name) }))
+      .filter((f) => f.rudiments.length),
+  })).filter((g) => g.families.length);
 }

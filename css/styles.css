@@ -401,6 +401,24 @@ input, select { font: inherit; color: inherit; }
 .log-right { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; }
 .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 8px; }
 .drawer-head h2 { font-size: 1.3rem; }
+.lib-collection > summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 20px 10px;
+  cursor: pointer;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.lib-collection > summary::-webkit-details-marker { display: none; }
+.lib-collection > summary::after { content: "▾"; position: absolute; right: 20px; top: 18px; color: var(--muted); }
+.lib-collection:not([open]) > summary::after { content: "▸"; }
+.lib-collection-name { font-weight: 700; font-size: 1.05rem; color: var(--accent); }
+.lib-collection-title { font-size: .8rem; color: var(--muted); }
 .lib-family {
   padding: 14px 20px 6px;
   font-size: .72rem;

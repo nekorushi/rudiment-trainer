@@ -2,7 +2,7 @@
 // practice screen and wires input to the Player and the drawers. Feature logic
 // lives in the modules imported below.
 
-import { RUDIMENTS, FAMILIES, getRudiment } from './rudiments.js';
+import { RUDIMENTS, getRudiment, groupRudiments, groupLabel } from './rudiments.js';
 import { RoutineSequence } from './sequencer.js';
 import { BPM_MIN, BPM_MAX, clamp, loadSettings, saveSettings, applySetting, toSeqOptions } from './settings.js';
 import { loadLog, saveLog, addSessions, markClean, clearBest, SessionTracker } from './log.js';
@@ -38,7 +38,7 @@ let toastTimer = 0;
 const routinesPanel = new RoutinesPanel({
   root: $('#routines'),
   rudiments: RUDIMENTS,
-  families: FAMILIES,
+  groups: groupRudiments(),
   onPlay: playRoutine,
   onChange: (list) => {
     routines = list;
@@ -77,7 +77,7 @@ function render() {
   // During a routine the header and tempo follow the routine (see showRoutineEvent).
   if (!routine) {
     $('#r-name').textContent = r.name;
-    $('#r-family').textContent = r.family ?? '';
+    $('#r-family').textContent = groupLabel(r);
     $('#bpm-value').textContent = S.bpm;
   }
   $('#notation').hidden = S.view !== 'notation';
@@ -211,7 +211,7 @@ function showRoutineEvent(ev) {
   const v = view();
   if (r.id !== v.patternId) v.show(r);
   $('#r-name').textContent = r.name;
-  $('#r-family').textContent = r.family ?? '';
+  $('#r-family').textContent = groupLabel(r);
   $('#bpm-value').textContent = Math.round(ev.bpm);
   const next = routine.items[ev.item + 1];
   $('#routine-banner').textContent =
@@ -345,7 +345,7 @@ function wire() {
   const library = drawer('library');
   drawers = [library, drawer('routines'), drawer('log', () => logPanel.render(log))];
 
-  renderLibrary($('#library'), RUDIMENTS, FAMILIES, (id) => {
+  renderLibrary($('#library'), groupRudiments(), (id) => {
     set('rudiment', id);
     markLibrary($('#library'), id);
     library.close();

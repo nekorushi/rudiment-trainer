@@ -59,6 +59,21 @@ function segments(tokens) {
   return segs;
 }
 
+/**
+ * In a 6-step beat: is every third of the beat either one 2-step segment or
+ * two 1-step segments, with at least one 2-step segment? (All 1-step is a
+ * plain sextuplet.)
+ */
+function isSplitTriplet(segs) {
+  let whole = 0;
+  for (let cell = 0; cell < 3; cell += 1) {
+    const inCell = segs.filter((s) => s.pos >= cell * 2 && s.pos < cell * 2 + 2);
+    if (inCell.length === 1 && inCell[0].pos === cell * 2 && inCell[0].len === 2) whole += 1;
+    else if (!(inCell.length === 2 && inCell.every((s) => s.len === 1))) return false;
+  }
+  return whole > 0;
+}
+
 /** Greedy spelling of segments: the stroke takes the longest value that fits, rests fill the rest. */
 function spell(segs, table) {
   const out = [];
@@ -95,6 +110,12 @@ export function spellBeat(tokens) {
   }
 
   // g === 6
+  // An eighth-note triplet with some eighths split into two sixteenths (e.g.
+  // the flam drag) reads best as a plain "3" over the beat.
+  if (isSplitTriplet(segs)) {
+    const items = spell(segs, TRIPLET_16TH);
+    return { items, tuplets: [{ from: 0, to: items.length - 1, n: 3 }] };
+  }
   if (segs.some((s) => s.pos < 3 && s.pos + s.len > 3)) {
     const items = spell(segs, SEXTUPLET);
     return { items, tuplets: [{ from: 0, to: items.length - 1, n: 6 }] };

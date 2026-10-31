@@ -5,7 +5,7 @@ Personal drum-rudiments practice PWA for the owner's iPad. Installed via Safari 
 ## Decisions already made (from the brainstorm)
 
 - **Purpose:** practice tool first (metronome + play-along), not a reference book.
-- **Content:** the 26 standard (NARD) rudiments, in `js/rudiments.js`. Stroke rolls use the open form (diddles as sixteenths); rudiments that end on their starting hand have a right-lead and a left-lead half. Ids are permanent: the practice log and routines are keyed by them.
+- **Content:** rudiments come in collections, one module each under `js/collections/` (`nard.js` = the 26 standard NARD rudiments, `pas.js` = the 14 PAS additions; together the PAS 40), registered in `js/rudiments.js` (`COLLECTIONS`, `groupRudiments`). The library drawer and routine picker group by collection, then family. NARD: Stroke rolls use the open form (diddles as sixteenths); rudiments that end on their starting hand have a right-lead and a left-lead half. Ids are global across collections and permanent: the practice log and routines are keyed by them (tested unique).
 - **Display per rudiment:** sticking letters (R/L), standard notation as **custom SVG** (no VexFlow), animated playhead synced to the audio, audio playback.
 - **Audio:** Web Audio **synthesis** only (no sample files). Accents, taps and grace notes at different volumes. No stereo panning.
 - **Playback:** continuous loop, open-close-open, count-in, timed session. All four exist.

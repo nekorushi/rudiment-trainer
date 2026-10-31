@@ -8,13 +8,13 @@ export class RoutinesPanel {
   /**
    * @param {object} o
    * @param {HTMLElement} o.root
-   * @param {object[]} o.rudiments  parsed patterns (for names and the picker)
-   * @param {string[]} o.families
+   * @param {object[]} o.rudiments  parsed patterns (for names)
+   * @param {object[]} o.groups     from groupRudiments() (for the picker)
    * @param {(routine: object) => void} o.onPlay
    * @param {(list: object[]) => void} o.onChange  the list was edited; persist it
    */
-  constructor({ root, rudiments, families, onPlay, onChange }) {
-    Object.assign(this, { root, rudiments, families, onPlay, onChange });
+  constructor({ root, rudiments, groups, onPlay, onChange }) {
+    Object.assign(this, { root, rudiments, groups, onPlay, onChange });
     this.ids = rudiments.map((r) => r.id);
     this.list = [];
     this.draft = null; // routine being edited (a copy), or null for the list view
@@ -138,15 +138,17 @@ export class RoutinesPanel {
     const top = el('div', 'item-top');
     const select = el('select', 'select');
     select.setAttribute('aria-label', `Rudiment ${i + 1}`);
-    for (const family of this.families) {
-      const group = el('optgroup');
-      group.label = family;
-      for (const r of this.rudiments.filter((x) => x.family === family)) {
-        const opt = el('option', null, r.name);
-        opt.value = r.id;
-        group.append(opt);
+    for (const { collection, families } of this.groups) {
+      for (const family of families) {
+        const group = el('optgroup');
+        group.label = `${collection.name} · ${family.name}`;
+        for (const r of family.rudiments) {
+          const opt = el('option', null, r.name);
+          opt.value = r.id;
+          group.append(opt);
+        }
+        select.append(group);
       }
-      select.append(group);
     }
     select.value = it.rudiment;
     select.addEventListener('change', () => { it.rudiment = select.value; });

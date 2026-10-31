@@ -44,6 +44,14 @@ test('triplet beats get a 3 or 6 and the right values', () => {
   assert.equal(rhythm(eighths), '8 8');
   assert.deepEqual(eighths.tuplets, []);
 
+  // eighth-note triplets, some eighths split into sixteenths: a plain 3 (flam drag)
+  const drag = spellBeat(beat(6, 'r . l l r .'));
+  assert.equal(rhythm(drag), '8 16 16 8');
+  assert.deepEqual(drag.tuplets, [{ from: 0, to: 3, n: 3 }]);
+  const triplet = spellBeat(beat(6, 'r . l . r .'));
+  assert.equal(rhythm(triplet), '8 8 8');
+  assert.deepEqual(triplet.tuplets, [{ from: 0, to: 2, n: 3 }]);
+
   // a stroke crossing the half beat makes the whole beat a sextuplet
   const cross = spellBeat(beat(6, 'r l . . r l'));
   assert.equal(rhythm(cross), '16 8. 16 16');

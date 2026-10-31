@@ -6,7 +6,9 @@ A drum-rudiment practice app for iPad (and any browser), built as an installable
 
 **Stage 2:** all 26 standard (NARD) rudiments, drawn as standard notation (SVG) with sticking and a playhead that follows the audio. A Notation / Sticking switch shows big sticking letters instead.
 
-**Stage 3 (this version):** routines (an ordered list of rudiments, each with its own tempo, length and mode, played back to back), a practice log (session history, best clean tempo per rudiment via the ✓ Clean button, daily time and streak), and JSON export/import of everything.
+**Collections:** NARD 26 and the 14 PAS additions (together the PAS 40 International Drum Rudiments), each its own section in the library.
+
+**Stage 3:** routines (an ordered list of rudiments, each with its own tempo, length and mode, played back to back), a practice log (session history, best clean tempo per rudiment via the ✓ Clean button, daily time and streak), and JSON export/import of everything.
 
 ## Run it locally
 
@@ -45,7 +47,8 @@ js/store.js           failure-tolerant localStorage JSON helpers
 js/log.js             practice log: session records, best tempo, streak
 js/routines.js        routines: model, validation, mapping to playback
 js/backup.js          JSON export/import (merge)
-js/rudiments.js       rudiment library: the 26 standard rudiments
+js/rudiments.js       rudiment library: registry of collections, grouping
+js/collections/       one module per collection (nard.js: the 26 standard rudiments, pas.js: the 14 PAS additions)
 js/notation.js        pure notation layout: rhythm spelling, beams, tuplets, line wrapping
 js/ui/                DOM views: SVG staff, sticking row, library list, drawers, routines editor, log, settings controls
 js/app.js             composition root: state, rendering, input wiring
